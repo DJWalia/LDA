@@ -110,7 +110,7 @@ if fetch_button:
     if error:
         st.error(error)
     else:
-        with st.spinner("Fetching filings from Senate API..."):
+        with st.spinner("Fetching filings from Senate API. This may take a while."):
             try:
                 payload = fetch_filings(
                     api_token,
@@ -124,6 +124,7 @@ if fetch_button:
                 st.error(f"Request failed: {exc}")
             else:
                 results = payload.get("results", [])
+                st.write(type(results))
                 count = payload.get("count", len(results))
 
                 results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}).")
