@@ -179,7 +179,8 @@ if fetch_button:
                             
                             for filing in payload.get("results", []):
                                 for activity in filing.get("lobbying_activities", []):
-                                    for lobbyist in activity.get("lobbyists", {}):
+                                    for lobbyist in activity.get("lobbyists", []):
+                                        st.write(lobbyist[first_name])
                                         first_name = lobbyist.get("first_name") or ""
                                         last_name = lobbyist.get("last_name") or ""
                                         name = first_name + " " + last_name
