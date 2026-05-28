@@ -140,21 +140,21 @@ if fetch_button:
                             simplified_rows = [_simplified_row(r) for r in results]
                             full_csv = build_csv(flattened_rows)
                             simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
-
-                            
                             
                             simplified_csv_string = simplified_csv.decode('utf-8')
                             main_buffer = io.StringIO(simplified_csv_string, newline='')
-                            main_buffer.seek(0, io.SEEK_END)
                             writer = csv.writer(main_buffer)
                             incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
                             next(incoming_reader, None)
+                            
+                            fields = ["Lobbyist Name", "Position"]
+                            writer.writerow(fields)
                             
                             for filing in payload.get("results", []):
                                 for lobbyist in payload.get("lobbyists", []):
                                     name = lobbyist.get("name")
                                     position = lobbyist.get("covered_position", "")
-                                    writer.writerow([filing_id, filing_type, filing_year, name, covered_pos])
+                                    writer.writerow([name, position])
                             
                             total_csv = main_buffer.getvalue().encode('utf-8')
                             main_buffer.close()
