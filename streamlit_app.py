@@ -133,7 +133,7 @@ if fetch_button:
                     if x == 1:
                         if results:
                             
-                            results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}) for ",name)
+                            results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}) for {name}")
                             
                             json_bytes = json.dumps(payload, indent=2).encode("utf-8")
                             flattened_rows = [_flatten_record(r) for r in results]
@@ -169,12 +169,12 @@ if fetch_button:
                             main_buffer.close()
     
                         else:
-                            results_placeholder.info("No filings matched the provided filters.")
+                            results_placeholder.info(f"No filings matched the provided filters for {name}.")
                             
                     if x == 0:              
                         if results:
                             
-                            results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}).")
+                            results_placeholder.success(f"Returned {len(results)} filings for {name} (reported total: {count})")
                             
                             simplified_rows = [_simplified_row(r) for r in results]
                             simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
