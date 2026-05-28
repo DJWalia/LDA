@@ -113,11 +113,11 @@ if fetch_button:
     else:
         with st.spinner("Fetching filings from Senate API. This may take a while."):
             count = 0
-            for client_name in items_list:
+            for item in items_list:
                 try:
                     payload = fetch_filings(
                         api_token,
-                        client_name=client_name or None,
+                        client_name=item or None,
                         client_id=client_id,
                         lobbyist_name=lobbyist_name or None,
                         lobbyist_id=lobbyist_id,
@@ -126,10 +126,11 @@ if fetch_button:
                     if count == 1:
                         st.write(client_name)
                         new = payload.get("results",[])
+                        st.write("new len: ",len(new))
                         st.write("Count is 1.")
                         results.append(new)
                         st.write("Results append.")
-                        st.write(len(results))
+                        st.write("results len: ",len(results))
                     else:
                         st.write(client_name)
                         results = payload.get("results",[])
