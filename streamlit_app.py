@@ -155,13 +155,15 @@ if fetch_button:
                             simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
 
                             csv_string = simplified_csv.decode('utf-8')
-                            string_buffer = io.StringIO(total_csv, newline='')
+                            total_csv_string = total_csv.decode('utf-8')
+                            string_buffer = io.StringIO(total_csv_string, newline='')
                             writer = csv.writer(string_buffer)
-                            writer.writerows(simplified_csv)
+                            writer.writerows(simplified_csv_string)
     
-                            simplified_csv_updated = string_buffer.getvalue()                        
-                            total_csv_string = simplified_csv_updated
-                            total_csv = total_csv_string.encode('utf-8')
+                            simplified_csv_string_updated = string_buffer.getvalue()
+                            string_buffer.close()
+                            total_csv_string_updated = simplified_csv_string_updated
+                            total_csv = total_csv_string_updated.encode('utf-8')
     
                     else:
                         results_placeholder.info("No filings matched the provided filters.")
