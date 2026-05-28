@@ -122,14 +122,12 @@ if fetch_button:
                         lobbyist_id=lobbyist_id,
                         pause_seconds=pause_seconds,
                     )
+                    new = payload.get("results",[])
+                    results.append(new)
                 except Exception as exc:
                     st.error(f"Request failed: {exc}")
                 else:
-                    try:
-                        new = payload.get("results",[])
-                        results.append(new)
-                    finally:
-                        results = payload.get("results", [])
+                    results = payload.get("results", [])
 
                     # Build download artifacts
             try:
