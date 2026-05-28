@@ -173,8 +173,9 @@ if fetch_button:
                             writer = csv.writer(main_buffer)
                             incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
                             next(incoming_reader, None)
-                            
-                            fields = ["Lobbyist Name"]
+
+                            fields_name = "Lobbyist Names for " + name
+                            fields = ["Lobbyist Name", "Filing Link"]
                             writer.writerow(fields)
                             
                             for filing in payload.get("results", []):
@@ -183,8 +184,9 @@ if fetch_button:
                                         lobbyist_data = lobbyist.get("lobbyist", [])
                                         first_name = lobbyist_data.get("first_name") or ""
                                         last_name = lobbyist_data.get("last_name") or ""
-                                        name = first_name + " " + last_name
-                                        writer.writerow([name])
+                                        full_name = first_name + " " + last_name
+                                        st.write(filing)
+                                        writer.writerow([full_name])
                             
                             total_csv = main_buffer.getvalue().encode('utf-8')
                             main_buffer.close()
