@@ -132,7 +132,7 @@ if fetch_button:
     
                     results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}).")
     
-                    if x = 0                
+                    if x == 0                
                         if results:
                             json_bytes = json.dumps(payload, indent=2).encode("utf-8")
                             flattened_rows = [_flatten_record(r) for r in results]
@@ -146,7 +146,7 @@ if fetch_button:
                     else:
                         results_placeholder.info("No filings matched the provided filters.")
     
-                    elif x = 1:
+                    elif x == 1:
                         if results:
                             json_bytes = json.dumps(payload, indent=2).encode("utf-8")
                             flattened_rows = [_flatten_record(r) for r in results]
