@@ -252,21 +252,6 @@ if fetch_button:
                                 incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
                                 next(incoming_reader, None)
                                 writer.writerows(incoming_reader)
-    
-                                fields = ["Source", "Lobbyist Name", "Filing Link"]
-                                writer.writerow(fields)
-                                
-                                for filing in payload.get("results", []):
-                                    for activity in filing.get("lobbying_activities", []):
-                                        for lobbyist in activity.get("lobbyists", []):
-                                            lobbyist_data = lobbyist.get("lobbyist", [])
-                                            first_name = lobbyist_data.get("first_name") or ""
-                                            last_name = lobbyist_data.get("last_name") or ""
-                                            full_name = first_name + " " + last_name
-                                            uuid = filing.get("filing_uuid")
-                                            link = f"https://lda.senate.gov/filings/public/filing/{uuid}/print/"
-                                            
-                                            writer.writerow([name, full_name, link])
                                             
                                 total_csv = main_buffer.getvalue().encode('utf-8')
                                 main_buffer.close()
@@ -283,30 +268,7 @@ if fetch_button:
                                 
                                 simplified_rows = [_simplified_row(r) for r in results]
                                 simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
-                                
-                                simplified_csv_string = simplified_csv.decode('utf-8')
-                                main_buffer = io.StringIO(simplified_csv_string, newline='')
-                                main_buffer.seek(0, io.SEEK_END)
-                                writer = csv.writer(main_buffer)
-                                incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
-                                next(incoming_reader, None)
-    
-                                fields = ["Source", "Lobbyist Name", "Filing Link"]
-                                writer.writerow(fields)
-                                
-                                for filing in payload.get("results", []):
-                                    for activity in filing.get("lobbying_activities", []):
-                                        for lobbyist in activity.get("lobbyists", []):
-                                            lobbyist_data = lobbyist.get("lobbyist", [])
-                                            first_name = lobbyist_data.get("first_name") or ""
-                                            last_name = lobbyist_data.get("last_name") or ""
-                                            full_name = first_name + " " + last_name
-                                            uuid = filing.get("filing_uuid")
-                                            link = f"https://lda.senate.gov/filings/public/filing/{uuid}/print/"
-                                            writer.writerow([name, full_name, link])
-                                
-                                total_csv = main_buffer.getvalue().encode('utf-8')
-                                main_buffer.close()
+                                total_csv = simplified_csv
                                 x = 1
                                 
                             else:
@@ -334,9 +296,9 @@ if fetch_button:
                         
                         simplified_rows = [_simplified_row(r) for r in results]
                         simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
+                        total_csv = simplified_csv
                     else:
-                        results_placeholder.info(f"No filings matched the provided filters.")
-                        st.write(f"No filings matched the provided filters.")
+                        results_placeholder.info(f"No filings matched the provided filter.")
             
             with download_placeholder:
                     st.subheader("Download")
