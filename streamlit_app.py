@@ -182,7 +182,7 @@ if fetch_button:
                                     for lobbyist in activity.get("lobbyists", []):
                                         first_name = lobbyist.get("first_name")
                                         last_name = lobbyist.get("last_name")
-                                        st.write(first_name)
+                                        st.write(lobbyist)
                                         name = first_name + " " + last_name
                                         writer.writerow([name])
                             
