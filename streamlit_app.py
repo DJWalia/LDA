@@ -180,8 +180,9 @@ if fetch_button:
                             for filing in payload.get("results", []):
                                 for activity in filing.get("lobbying_activities", []):
                                     for lobbyist in activity.get("lobbyists", []):
-                                        name = lobbyist.get("name")
-                                        st.write(lobbyist)
+                                        first_name = lobbyist.get("first_name")
+                                        last_name = lobbyist.get("last_name")
+                                        name = first_name + " " + last_name
                                         writer.writerow([name])
                             
                             total_csv = main_buffer.getvalue().encode('utf-8')
