@@ -112,7 +112,7 @@ if fetch_button:
     if error:
         st.error(error)
     else:
-        with st.spinner("Fetching filings from Senate API..."):
+        with st.spinner("Fetching filings from Senate API. This may take a while."):
             for name in client_name_list:
                 client_name = name
                 try:
@@ -140,7 +140,9 @@ if fetch_button:
                             simplified_rows = [_simplified_row(r) for r in results]
                             full_csv = build_csv(flattened_rows)
                             simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
-
+                            
+                            total_csv = main_buffer.getvalue().encode('utf-8')
+                            main_buffer.close()
                             total_csv_string = total_csv.decode('utf-8')
                             main_buffer = io.StringIO(total_csv_string, newline='')
                             main_buffer.seek(0, io.SEEK_END)
@@ -150,6 +152,21 @@ if fetch_button:
                             incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
                             next(incoming_reader, None)
                             writer.writerows(incoming_reader)
+
+                            fields_name = "Lobbyist Names for " + name
+                            fields = ["Lobbyist Name", "Filing Link"]
+                            writer.writerow(fields)
+                            
+                            for filing in payload.get("results", []):
+                                for activity in filing.get("lobbying_activities", []):
+                                    for lobbyist in activity.get("lobbyists", []):
+                                        lobbyist_data = lobbyist.get("lobbyist", [])
+                                        first_name = lobbyist_data.get("first_name") or ""
+                                        last_name = lobbyist_data.get("last_name") or ""
+                                        full_name = first_name + " " + last_name
+                                        link = filing.get("url")
+                                        writer.writerow([full_name, link])
+                                        
                             total_csv = main_buffer.getvalue().encode('utf-8')
                             main_buffer.close()
     
@@ -161,10 +178,7 @@ if fetch_button:
                             
                             results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}).")
                             
-                            json_bytes = json.dumps(payload, indent=2).encode("utf-8")
-                            flattened_rows = [_flatten_record(r) for r in results]
                             simplified_rows = [_simplified_row(r) for r in results]
-                            full_csv = build_csv(flattened_rows)
                             simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
                             
                             simplified_csv_string = simplified_csv.decode('utf-8')
@@ -185,8 +199,8 @@ if fetch_button:
                                         first_name = lobbyist_data.get("first_name") or ""
                                         last_name = lobbyist_data.get("last_name") or ""
                                         full_name = first_name + " " + last_name
-                                        st.write(filing)
-                                        writer.writerow([full_name])
+                                        link = filing.get("url")
+                                        writer.writerow([full_name, link])
                             
                             total_csv = main_buffer.getvalue().encode('utf-8')
                             main_buffer.close()
@@ -196,21 +210,9 @@ if fetch_button:
                             results_placeholder.info("No filings matched the provided filters.")
 
             with download_placeholder:
-                    st.subheader("Downloads")
+                    st.subheader("Download")
                     st.download_button(
-                        "Download JSON payload",
-                        data=json_bytes,
-                        file_name="filings.json",
-                        mime="application/json",
-                    )
-                    st.download_button(
-                        "Download full CSV (flattened)",
-                        data=full_csv,
-                        file_name="filings_full.csv",
-                        mime="text/csv",
-                    )
-                    st.download_button(
-                        "Download simplified CSV",
+                        "Download CSV",
                         data=total_csv,
                         file_name="filings_simple.csv",
                         mime="text/csv",
