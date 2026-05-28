@@ -179,7 +179,7 @@ if fetch_button:
                             
                             for filing in payload.get("results", []):
                                 for activity in filing.get("lobbying_activities", []):
-                                    for lobbyist in payload.get("lobbyists", []):
+                                    for lobbyist in activity.get("lobbyists", []):
                                         name = lobbyist.get("name")
                                         st.write(lobbyist)
                                         writer.writerow([name])
