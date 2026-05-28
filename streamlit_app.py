@@ -132,31 +132,33 @@ if fetch_button:
                         results = payload.get("results", [])
 
                     # Build download artifacts
-            json_bytes = json.dumps(payload, indent=2).encode("utf-8")
-            flattened_rows = [_flatten_record(r) for r in results]
-            simplified_rows = [_simplified_row(r) for r in results]
-            full_csv = build_csv(flattened_rows)
-            simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
-
-            with download_placeholder:
-                st.subheader("Downloads")
-                st.download_button(
-                    "Download JSON payload",
-                    data=json_bytes,
-                    file_name="filings.json",
-                    mime="application/json",
-                )
-                st.download_button(
-                    "Download full CSV (flattened)",
-                    data=full_csv,
-                    file_name="filings_full.csv",
-                    mime="text/csv",
-                )
-                st.download_button(
-                    "Download simplified CSV",
-                    data=simplified_csv,
-                    file_name="filings_simple.csv",
-                    mime="text/csv",
-                )
-        else:
-            results_placeholder.info("No filings matched the provided filters.")
+            try:
+                json_bytes = json.dumps(payload, indent=2).encode("utf-8")
+                flattened_rows = [_flatten_record(r) for r in results]
+                simplified_rows = [_simplified_row(r) for r in results]
+                full_csv = build_csv(flattened_rows)
+                simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
+                with download_placeholder:
+                    st.subheader("Downloads")
+                    st.download_button(
+                        "Download JSON payload",
+                        data=json_bytes,
+                        file_name="filings.json",
+                        mime="application/json",
+                    )
+                    st.download_button(
+                        "Download full CSV (flattened)",
+                        data=full_csv,
+                        file_name="filings_full.csv",
+                        mime="text/csv",
+                    )
+                    st.download_button(
+                        "Download simplified CSV",
+                        data=simplified_csv,
+                        file_name="filings_simple.csv",
+                        mime="text/csv",
+                    )
+            except Exception as exc:
+                    st.error(f"Request failed: {exc}")
+            else:
+                results_placeholder.info("No filings matched the provided filters.")
