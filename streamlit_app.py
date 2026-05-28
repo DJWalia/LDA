@@ -86,7 +86,7 @@ with st.sidebar:
             except ValueError:
                 st.warning("Lobbyist ID must be numeric.")
 
-    pause_seconds = st.slider("Pause between paginated requests (seconds)", 0.0, 10.0, 1.0, 0.5)
+    pause_seconds = st.slider("Pause between paginated requests (seconds), increase if you are rate-limited.", 0.0, 10.0, 1.0, 0.5)
 
     fetch_button = st.button("Fetch Filings", type="primary")
 
@@ -133,7 +133,8 @@ if fetch_button:
                     if x == 1:
                         if results:
                             
-                            results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}) for {name}")
+                            results_placeholder.success(f"Returned {len(results)} filings for {name} (reported total: {count})")
+                            st.write(f"Returned {len(results)} filings for {name} (reported total: {count})")
                             
                             json_bytes = json.dumps(payload, indent=2).encode("utf-8")
                             flattened_rows = [_flatten_record(r) for r in results]
@@ -170,11 +171,13 @@ if fetch_button:
     
                         else:
                             results_placeholder.info(f"No filings matched the provided filters for {name}.")
+                            st.write(f"No filings matched the provided filters for {name}.")
                             
                     if x == 0:              
                         if results:
                             
                             results_placeholder.success(f"Returned {len(results)} filings for {name} (reported total: {count})")
+                            st.write(f"Returned {len(results)} filings for {name} (reported total: {count})")
                             
                             simplified_rows = [_simplified_row(r) for r in results]
                             simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
@@ -205,7 +208,8 @@ if fetch_button:
                             x = 1
                             
                         else:
-                            results_placeholder.info("No filings matched the provided filters.")
+                            results_placeholder.info(f"No filings matched the provided filters for {name}.")
+                            st.write(f"No filings matched the provided filters for {name}.")
 
             with download_placeholder:
                     st.subheader("Download")
