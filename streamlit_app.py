@@ -146,7 +146,7 @@ if fetch_button:
                     else:
                         results_placeholder.info("No filings matched the provided filters.")
     
-                    elif x == 1:
+                    if x == 1:
                         if results:
                             json_bytes = json.dumps(payload, indent=2).encode("utf-8")
                             flattened_rows = [_flatten_record(r) for r in results]
