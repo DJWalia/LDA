@@ -72,7 +72,6 @@ with st.sidebar:
         items_list = [item.strip() for item in client_name.split("\n") if item.strip()]
         st.write(items_list)
         st.write(type(items_list))
-        st.write(type(items_list[1]))
         client_id_input = st.text_input("Client ID", placeholder="Numeric ID")
         if client_id_input.strip():
             try:
