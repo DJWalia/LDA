@@ -1,12 +1,13 @@
 import io
 import json
+import csv
 from typing import Dict, List, Optional
 
 import streamlit as st
 
 from lda_api import LDAClient, SIMPLE_CSV_FIELDS, _flatten_record, _simplified_row
 
-
+x = 0
 st.set_page_config(page_title="LDA Filings Explorer", layout="wide")
 st.title("Lobbying Disclosure Filings Explorer")
 
@@ -68,7 +69,8 @@ with st.sidebar:
     client_name = client_id = lobbyist_name = lobbyist_id = None
 
     if query_mode == "Client":
-        client_name = st.text_input("Client Name")
+        client_name = st.text_area("Client Names (separated by Enter)")
+        client_name_list = [line.strip() for line in client_name.split("\n") if line.strip()]
         client_id_input = st.text_input("Client ID", placeholder="Numeric ID")
         if client_id_input.strip():
             try:
@@ -111,67 +113,74 @@ if fetch_button:
         st.error(error)
     else:
         with st.spinner("Fetching filings from Senate API..."):
-            try:
-                payload = fetch_filings(
-                    api_token,
-                    client_name=client_name or None,
-                    client_id=client_id,
-                    lobbyist_name=lobbyist_name or None,
-                    lobbyist_id=lobbyist_id,
-                    pause_seconds=pause_seconds,
-                )
-            except Exception as exc:
-                st.error(f"Request failed: {exc}")
-            else:
-                results = payload.get("results", [])
-                count = payload.get("count", len(results))
-
-                results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}).")
-
-                if results:
-                    sample = results[:20]
-                    st.subheader("Preview (first 20 filings)")
-                    st.dataframe(
-                        [
-                            {
-                                "filing_uuid": row.get("filing_uuid"),
-                                "filing_year": row.get("filing_year"),
-                                "filing_period": row.get("filing_period_display") or row.get("filing_period"),
-                                "registrant": (row.get("registrant") or {}).get("name"),
-                                "client": (row.get("client") or {}).get("name"),
-                                "income": row.get("income"),
-                                "expenses": row.get("expenses"),
-                            }
-                            for row in sample
-                        ]
+            for name in client_name_list:
+                client_name = name
+                try:
+                    payload = fetch_filings(
+                        api_token,
+                        client_name=client_name or None,
+                        client_id=client_id,
+                        lobbyist_name=lobbyist_name or None,
+                        lobbyist_id=lobbyist_id,
+                        pause_seconds=pause_seconds,
                     )
-
-                    # Build download artifacts
-                    json_bytes = json.dumps(payload, indent=2).encode("utf-8")
-                    flattened_rows = [_flatten_record(r) for r in results]
-                    simplified_rows = [_simplified_row(r) for r in results]
-                    full_csv = build_csv(flattened_rows)
-                    simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
-
-                    with download_placeholder:
-                        st.subheader("Downloads")
-                        st.download_button(
-                            "Download JSON payload",
-                            data=json_bytes,
-                            file_name="filings.json",
-                            mime="application/json",
-                        )
-                        st.download_button(
-                            "Download full CSV (flattened)",
-                            data=full_csv,
-                            file_name="filings_full.csv",
-                            mime="text/csv",
-                        )
-                        st.download_button(
-                            "Download simplified CSV",
-                            data=simplified_csv,
-                            file_name="filings_simple.csv",
-                            mime="text/csv",
-                        )
+                except Exception as exc:
+                    st.error(f"Request failed: {exc}")
                 else:
-                    results_placeholder.info("No filings matched the provided filters.")
+                    results = payload.get("results", [])
+                    count = payload.get("count", len(results))
+    
+                    results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}).")
+    
+                    if x = 0                
+                        if results:
+                            json_bytes = json.dumps(payload, indent=2).encode("utf-8")
+                            flattened_rows = [_flatten_record(r) for r in results]
+                            simplified_rows = [_simplified_row(r) for r in results]
+                            full_csv = build_csv(flattened_rows)
+                            simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
+        
+                            total_csv = simplified_csv
+                            x = 1
+                            
+                    else:
+                        results_placeholder.info("No filings matched the provided filters.")
+    
+                    elif x = 1:
+                        if results:
+                            json_bytes = json.dumps(payload, indent=2).encode("utf-8")
+                            flattened_rows = [_flatten_record(r) for r in results]
+                            simplified_rows = [_simplified_row(r) for r in results]
+                            full_csv = build_csv(flattened_rows)
+                            simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
+    
+                            string_buffer = io.StringIO(total_csv, newline='')
+                            writer = csv.writer(string_buffer)
+                            writer.writerows(simplified_csv)
+    
+                            simplified_csv_updated = string_buffer.getvalue()                        
+                            total_csv = simplified_csv_updated
+    
+                    else:
+                        results_placeholder.info("No filings matched the provided filters.")
+
+            with download_placeholder:
+                    st.subheader("Downloads")
+                    st.download_button(
+                        "Download JSON payload",
+                        data=json_bytes,
+                        file_name="filings.json",
+                        mime="application/json",
+                    )
+                    st.download_button(
+                        "Download full CSV (flattened)",
+                        data=full_csv,
+                        file_name="filings_full.csv",
+                        mime="text/csv",
+                    )
+                    st.download_button(
+                        "Download simplified CSV",
+                        data=total_csv,
+                        file_name="filings_simple.csv",
+                        mime="text/csv",
+                    )
