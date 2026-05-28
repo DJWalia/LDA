@@ -143,6 +143,7 @@ if fetch_button:
                             
                             simplified_csv_string = simplified_csv.decode('utf-8')
                             main_buffer = io.StringIO(simplified_csv_string, newline='')
+                            main_buffer.seek(0, io.SEEK_END)
                             writer = csv.writer(main_buffer)
                             incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
                             next(incoming_reader, None)
@@ -153,6 +154,7 @@ if fetch_button:
                             for filing in payload.get("results", []):
                                 for lobbyist in payload.get("lobbyists", []):
                                     name = lobbyist.get("name")
+                                    st.write(name)
                                     position = lobbyist.get("covered_position", "")
                                     writer.writerow([name, position])
                             
