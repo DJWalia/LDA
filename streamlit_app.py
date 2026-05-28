@@ -141,8 +141,6 @@ if fetch_button:
                             full_csv = build_csv(flattened_rows)
                             simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
                             
-                            total_csv = main_buffer.getvalue().encode('utf-8')
-                            main_buffer.close()
                             total_csv_string = total_csv.decode('utf-8')
                             main_buffer = io.StringIO(total_csv_string, newline='')
                             main_buffer.seek(0, io.SEEK_END)
