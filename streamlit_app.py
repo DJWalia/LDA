@@ -200,6 +200,7 @@ if fetch_button:
                                         first_name = lobbyist_data.get("first_name") or ""
                                         last_name = lobbyist_data.get("last_name") or ""
                                         full_name = first_name + " " + last_name
+                                        st.write(filing)
                                         uuid = filing.get("uuid")
                                         link = f"https://lda.senate.gov/filings/public/filing/{uuid}/print/"
                                         writer.writerow([name, full_name, link])
