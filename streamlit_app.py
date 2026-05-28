@@ -126,10 +126,9 @@ if fetch_button:
                     st.error(f"Request failed: {exc}")
                 else:
                     try:
-                        results
                         new = payload.get("results",[])
                         results.append(new)
-                    else:
+                    finally:
                         results = payload.get("results", [])
 
                     # Build download artifacts
