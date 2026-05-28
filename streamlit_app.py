@@ -133,7 +133,7 @@ if fetch_button:
                     if x == 1:
                         if results:
                             
-                            results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}) for "name)
+                            results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}) for ",name)
                             
                             json_bytes = json.dumps(payload, indent=2).encode("utf-8")
                             flattened_rows = [_flatten_record(r) for r in results]
