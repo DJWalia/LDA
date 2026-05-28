@@ -155,7 +155,7 @@ if fetch_button:
                             simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
 
                             total_csv_string = total_csv.decode('utf-8')
-                            main_buffer = io.StringIO(base_string, newline='')
+                            main_buffer = io.StringIO(total_csv_string, newline='')
                             main_buffer.seek(0, io.SEEK_END)
                             writer = csv.writer(main_buffer)
 
