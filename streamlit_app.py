@@ -8,6 +8,7 @@ import streamlit as st
 from lda_api import LDAClient, SIMPLE_CSV_FIELDS, _flatten_record, _simplified_row
 
 x = 0
+mode = 0
 st.set_page_config(page_title="LDA Filings Explorer", layout="wide")
 st.title("Lobbying Disclosure Filings Explorer")
 
@@ -71,19 +72,23 @@ with st.sidebar:
     if query_mode == "Client":
         client_name = st.text_area("Client Names (separated by new line / Enter)")
         client_name_list = [line.strip() for line in client_name.split("\n") if line.strip()]
+        mode = 1
         client_id_input = st.text_input("Client ID", placeholder="Numeric ID")
         if client_id_input.strip():
             try:
                 client_id = int(client_id_input)
+                mode = 0
             except ValueError:
                 st.warning("Client ID must be numeric.")
     else:
         lobbyist_name = st.text_area("Lobbyist Names (separated by new line / Enter)")
         lobbyist_name_list = [line.strip() for line in lobbyist_name.split("\n") if line.strip()]
+        mode = 2
         lobbyist_id_input = st.text_input("Lobbyist ID", placeholder="Numeric ID")
         if lobbyist_id_input.strip():
             try:
                 lobbyist_id = int(lobbyist_id_input)
+                mode = 0
             except ValueError:
                 st.warning("Lobbyist ID must be numeric.")
 
@@ -114,7 +119,7 @@ if fetch_button:
         st.error(error)
     else:
         with st.spinner("Fetching filings from Senate API. This may take a while."):
-            if client_name_list:
+            if mode == 1:
                 for name in client_name_list:
                     client_name = name
                     try:
@@ -211,7 +216,7 @@ if fetch_button:
                                 results_placeholder.info(f"No filings matched the provided filters for {name}.")
                                 st.write(f"No filings matched the provided filters for {name}.")
 
-            elif lobbyist_name_list:
+            elif mode == 2:
                 for name in lobbyist_name_list:
                     lobbyist_name = name
                     try:
