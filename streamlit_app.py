@@ -86,7 +86,7 @@ with st.sidebar:
             except ValueError:
                 st.warning("Lobbyist ID must be numeric.")
 
-    pause_seconds = st.slider("Pause between paginated requests (seconds)", 0.0, 1.0, 0.3, 0.05)
+    pause_seconds = st.slider("Pause between paginated requests (seconds)", 0.0, 10.0, 1.0, 0.5)
 
     fetch_button = st.button("Fetch Filings", type="primary")
 
