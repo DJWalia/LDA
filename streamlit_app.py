@@ -129,7 +129,33 @@ if fetch_button:
                 else:
                     results = payload.get("results", [])
                     count = payload.get("count", len(results))
+
+                    if x == 1:
+                        if results:
+                            
+                            results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}).")
+                            
+                            json_bytes = json.dumps(payload, indent=2).encode("utf-8")
+                            flattened_rows = [_flatten_record(r) for r in results]
+                            simplified_rows = [_simplified_row(r) for r in results]
+                            full_csv = build_csv(flattened_rows)
+                            simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
+
+                            total_csv_string = total_csv.decode('utf-8')
+                            main_buffer = io.StringIO(total_csv_string, newline='')
+                            main_buffer.seek(0, io.SEEK_END)
+                            writer = csv.writer(main_buffer)
+
+                            simplified_csv_string = simplified_csv.decode('utf-8')
+                            incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
+                            next(incoming_reader, None)
+                            writer.writerows(incoming_reader)
+                            total_csv = main_buffer.getvalue().encode('utf-8')
+                            main_buffer.close()
     
+                        else:
+                            results_placeholder.info("No filings matched the provided filters.")
+                            
                     if x == 0:              
                         if results:
                             
@@ -162,32 +188,6 @@ if fetch_button:
                             main_buffer.close()
                             x = 1
                             
-                        else:
-                            results_placeholder.info("No filings matched the provided filters.")
-    
-                    if x == 1:
-                        if results:
-                            
-                            results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}).")
-                            
-                            json_bytes = json.dumps(payload, indent=2).encode("utf-8")
-                            flattened_rows = [_flatten_record(r) for r in results]
-                            simplified_rows = [_simplified_row(r) for r in results]
-                            full_csv = build_csv(flattened_rows)
-                            simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
-
-                            total_csv_string = total_csv.decode('utf-8')
-                            main_buffer = io.StringIO(total_csv_string, newline='')
-                            main_buffer.seek(0, io.SEEK_END)
-                            writer = csv.writer(main_buffer)
-
-                            simplified_csv_string = simplified_csv.decode('utf-8')
-                            incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
-                            next(incoming_reader, None)
-                            writer.writerows(incoming_reader)
-                            total_csv = main_buffer.getvalue().encode('utf-8')
-                            main_buffer.close()
-    
                         else:
                             results_placeholder.info("No filings matched the provided filters.")
 
