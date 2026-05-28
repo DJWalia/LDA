@@ -154,16 +154,17 @@ if fetch_button:
                             full_csv = build_csv(flattened_rows)
                             simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
 
-                            csv_string = simplified_csv.decode('utf-8')
                             total_csv_string = total_csv.decode('utf-8')
-                            string_buffer = io.StringIO(total_csv_string, newline='')
-                            writer = csv.writer(string_buffer)
-                            writer.writerows(simplified_csv_string)
-    
-                            simplified_csv_string_updated = string_buffer.getvalue()
-                            string_buffer.close()
-                            total_csv_string_updated = simplified_csv_string_updated
-                            total_csv = total_csv_string_updated.encode('utf-8')
+                            main_buffer = io.StringIO(base_string, newline='')
+                            main_buffer.seek(0, io.SEEK_END)
+                            writer = csv.writer(main_buffer)
+
+                            simplified_csv_string = simplified_csv.decode('utf-8')
+                            incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
+                            next(incoming_reader, None)
+                            writer.writerows(incoming_reader)
+                            total_csv = main_buffer.getvalue().encode('utf-8')
+                            main_buffer.close()
     
                     else:
                         results_placeholder.info("No filings matched the provided filters.")
