@@ -162,7 +162,7 @@ if fetch_button:
                                         first_name = lobbyist_data.get("first_name") or ""
                                         last_name = lobbyist_data.get("last_name") or ""
                                         full_name = first_name + " " + last_name
-                                        link = filing.get("url")
+                                        link = payload.get("filing_document_url")
                                         
                                         writer.writerow([name, full_name, link])
                                         
@@ -199,7 +199,7 @@ if fetch_button:
                                         first_name = lobbyist_data.get("first_name") or ""
                                         last_name = lobbyist_data.get("last_name") or ""
                                         full_name = first_name + " " + last_name
-                                        link = filing.get("url")
+                                        link = payload.get("filing_document_url")
                                         writer.writerow([name, full_name, link])
                             
                             total_csv = main_buffer.getvalue().encode('utf-8')
