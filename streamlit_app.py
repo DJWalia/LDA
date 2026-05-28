@@ -124,11 +124,16 @@ if fetch_button:
                         pause_seconds=pause_seconds,
                     )
                     if count == 1:
+                        st.write(client_name)
                         new = payload.get("results",[])
+                        st.write("Count is 1.")
                         results.append(new)
+                        st.write("Results append.")
                     else:
+                        st.write(client_name)
                         results = payload.get("results",[])
                         count = 1
+                        st.write("Count set to 1.")
                 except Exception as exc:
                     st.error(f"Request failed: {exc}")
                 else:
