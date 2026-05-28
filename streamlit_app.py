@@ -123,7 +123,7 @@ if fetch_button:
                         lobbyist_id=lobbyist_id,
                         pause_seconds=pause_seconds,
                     )
-                    if count = 1:
+                    if count == 1:
                         new = payload.get("results",[])
                         results.append(new)
                     else:
