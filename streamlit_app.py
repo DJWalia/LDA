@@ -251,7 +251,7 @@ if fetch_button:
                                 simplified_csv_string = simplified_csv.decode('utf-8')
                                 incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
                                 next(incoming_reader, None)
-                                writer.writerow(name)
+                                writer.writerow([name])
                                 writer.writerows(incoming_reader)
                                             
                                 total_csv = main_buffer.getvalue().encode('utf-8')
@@ -276,7 +276,7 @@ if fetch_button:
                                 incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
                                 next(incoming_reader, None)
 
-                                writer.writerow(name)
+                                writer.writerow([name])
                                 
                                 total_csv = main_buffer.getvalue().encode('utf-8')
                                 main_buffer.close()
