@@ -69,7 +69,7 @@ with st.sidebar:
     client_name = client_id = lobbyist_name = lobbyist_id = None
 
     if query_mode == "Client":
-        client_name = st.text_area("Client Names (separated by Enter)")
+        client_name = st.text_area("Client Names (separated by new line / Enter)")
         client_name_list = [line.strip() for line in client_name.split("\n") if line.strip()]
         client_id_input = st.text_input("Client ID", placeholder="Numeric ID")
         if client_id_input.strip():
