@@ -68,10 +68,7 @@ with st.sidebar:
     client_name = client_id = lobbyist_name = lobbyist_id = None
 
     if query_mode == "Client":
-        client_name = st.text_area("Client names, separated by new lines using Enter.")
-        items_list = [item.strip() for item in client_name.split("\n") if item.strip()]
-        st.write(items_list)
-        st.write(type(items_list))
+        client_name = st.text_input("Client Name")
         client_id_input = st.text_input("Client ID", placeholder="Numeric ID")
         if client_id_input.strip():
             try:
@@ -113,61 +110,68 @@ if fetch_button:
     if error:
         st.error(error)
     else:
-        with st.spinner("Fetching filings from Senate API. This may take a while."):
-            count = 0
-            for item in items_list:
+        with st.spinner("Fetching filings from Senate API..."):
+            try:
                 payload = fetch_filings(
                     api_token,
-                    client_name=item or None,
+                    client_name=client_name or None,
                     client_id=client_id,
                     lobbyist_name=lobbyist_name or None,
                     lobbyist_id=lobbyist_id,
                     pause_seconds=pause_seconds,
                 )
-                if count == 1:
-                    st.write(client_name)
-                    new = payload.get("results",[])
-                    st.write("new len: ",len(new))
-                    st.write("Count is 1.")
-                    results.append(new)
-                    st.write("Results append.")
-                    st.write("results len: ",len(results))
-                else:
-                    st.write(client_name)
-                    results = payload.get("results",[])
-                    count = 1
-                    st.write("Count set to 1.")
-                    st.write(len(results))
+            except Exception as exc:
+                st.error(f"Request failed: {exc}")
+            else:
+                results = payload.get("results", [])
+                count = payload.get("count", len(results))
+
+                results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}).")
+
+                if results:
+                    sample = results[:20]
+                    st.subheader("Preview (first 20 filings)")
+                    st.dataframe(
+                        [
+                            {
+                                "filing_uuid": row.get("filing_uuid"),
+                                "filing_year": row.get("filing_year"),
+                                "filing_period": row.get("filing_period_display") or row.get("filing_period"),
+                                "registrant": (row.get("registrant") or {}).get("name"),
+                                "client": (row.get("client") or {}).get("name"),
+                                "income": row.get("income"),
+                                "expenses": row.get("expenses"),
+                            }
+                            for row in sample
+                        ]
+                    )
 
                     # Build download artifacts
-            try:
-                json_bytes = json.dumps(payload, indent=2).encode("utf-8")
-                flattened_rows = [_flatten_record(r) for r in results]
-                simplified_rows = [_simplified_row(r) for r in results]
-                full_csv = build_csv(flattened_rows)
-                simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
-                with download_placeholder:
-                    st.subheader("Downloads")
-                    st.download_button(
-                        "Download JSON payload",
-                        data=json_bytes,
-                        file_name="filings.json",
-                        mime="application/json",
-                    )
-                    st.download_button(
-                        "Download full CSV (flattened)",
-                        data=full_csv,
-                        file_name="filings_full.csv",
-                        mime="text/csv",
-                    )
-                    st.download_button(
-                        "Download simplified CSV",
-                        data=simplified_csv,
-                        file_name="filings_simple.csv",
-                        mime="text/csv",
-                    )
-            except Exception as exc:
-                    st.error(f"Request failed: {exc}")
-            else:
-                results_placeholder.info("No filings matched the provided filters.")
-                st.write(len(results))
+                    json_bytes = json.dumps(payload, indent=2).encode("utf-8")
+                    flattened_rows = [_flatten_record(r) for r in results]
+                    simplified_rows = [_simplified_row(r) for r in results]
+                    full_csv = build_csv(flattened_rows)
+                    simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
+
+                    with download_placeholder:
+                        st.subheader("Downloads")
+                        st.download_button(
+                            "Download JSON payload",
+                            data=json_bytes,
+                            file_name="filings.json",
+                            mime="application/json",
+                        )
+                        st.download_button(
+                            "Download full CSV (flattened)",
+                            data=full_csv,
+                            file_name="filings_full.csv",
+                            mime="text/csv",
+                        )
+                        st.download_button(
+                            "Download simplified CSV",
+                            data=simplified_csv,
+                            file_name="filings_simple.csv",
+                            mime="text/csv",
+                        )
+                else:
+                    results_placeholder.info("No filings matched the provided filters.")
