@@ -144,7 +144,7 @@ if fetch_button:
                             
                             
                             simplified_csv_string = simplified_csv.decode('utf-8')
-                            main_buffer = io.StringIO(total_csv_string, newline='')
+                            main_buffer = io.StringIO(simplified_csv_string, newline='')
                             main_buffer.seek(0, io.SEEK_END)
                             writer = csv.writer(main_buffer)
                             incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
@@ -157,6 +157,7 @@ if fetch_button:
                                     writer.writerow([filing_id, filing_type, filing_year, name, covered_pos])
                             
                             total_csv = main_buffer.getvalue().encode('utf-8')
+                            main_buffer.close()
                             x = 1
                             
                         else:
