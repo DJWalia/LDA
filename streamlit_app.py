@@ -78,7 +78,8 @@ with st.sidebar:
             except ValueError:
                 st.warning("Client ID must be numeric.")
     else:
-        lobbyist_name = st.text_input("Lobbyist Name")
+        lobbyist_name = st.text_area("Lobbyist Names (separated by new line / Enter)")
+        lobbyist_name_list = [line.strip() for line in lobbyist_name.split("\n") if line.strip()]
         lobbyist_id_input = st.text_input("Lobbyist ID", placeholder="Numeric ID")
         if lobbyist_id_input.strip():
             try:
@@ -86,7 +87,7 @@ with st.sidebar:
             except ValueError:
                 st.warning("Lobbyist ID must be numeric.")
 
-    pause_seconds = st.slider("Pause between paginated requests (seconds), increase if you are rate-limited.", 0.0, 10.0, 1.0, 0.5)
+    pause_seconds = st.slider("Pause between paginated requests (seconds), increase and run again if you get rate-limited.", 0.0, 10.0, 1.0, 0.5)
 
     fetch_button = st.button("Fetch Filings", type="primary")
 
@@ -113,8 +114,200 @@ if fetch_button:
         st.error(error)
     else:
         with st.spinner("Fetching filings from Senate API. This may take a while."):
-            for name in client_name_list:
-                client_name = name
+            if client_name_list:
+                for name in client_name_list:
+                    client_name = name
+                    try:
+                        payload = fetch_filings(
+                            api_token,
+                            client_name=client_name or None,
+                            client_id=client_id,
+                            lobbyist_name=lobbyist_name or None,
+                            lobbyist_id=lobbyist_id,
+                            pause_seconds=pause_seconds,
+                        )
+                    except Exception as exc:
+                        st.error(f"Request failed: {exc}")
+                    else:
+                        results = payload.get("results", [])
+                        count = payload.get("count", len(results))
+    
+                        if x == 1:
+                            if results:
+                                
+                                results_placeholder.success(f"Returned {len(results)} filings for {name} (reported total: {count})")
+                                st.write(f"Returned {len(results)} filings for {name} (reported total: {count})")
+                                
+                                simplified_rows = [_simplified_row(r) for r in results]
+                                simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
+                                
+                                total_csv_string = total_csv.decode('utf-8')
+                                main_buffer = io.StringIO(total_csv_string, newline='')
+                                main_buffer.seek(0, io.SEEK_END)
+                                writer = csv.writer(main_buffer)
+    
+                                simplified_csv_string = simplified_csv.decode('utf-8')
+                                incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
+                                next(incoming_reader, None)
+                                writer.writerows(incoming_reader)
+    
+                                fields = ["Source", "Lobbyist Name", "Filing Link"]
+                                writer.writerow(fields)
+                                
+                                for filing in payload.get("results", []):
+                                    for activity in filing.get("lobbying_activities", []):
+                                        for lobbyist in activity.get("lobbyists", []):
+                                            lobbyist_data = lobbyist.get("lobbyist", [])
+                                            first_name = lobbyist_data.get("first_name") or ""
+                                            last_name = lobbyist_data.get("last_name") or ""
+                                            full_name = first_name + " " + last_name
+                                            uuid = filing.get("filing_uuid")
+                                            link = f"https://lda.senate.gov/filings/public/filing/{uuid}/print/"
+                                            
+                                            writer.writerow([name, full_name, link])
+                                            
+                                total_csv = main_buffer.getvalue().encode('utf-8')
+                                main_buffer.close()
+        
+                            else:
+                                results_placeholder.info(f"No filings matched the provided filters for {name}.")
+                                st.write(f"No filings matched the provided filters for {name}.")
+                                
+                        if x == 0:              
+                            if results:
+                                
+                                results_placeholder.success(f"Returned {len(results)} filings for {name} (reported total: {count})")
+                                st.write(f"Returned {len(results)} filings for {name} (reported total: {count})")
+                                
+                                simplified_rows = [_simplified_row(r) for r in results]
+                                simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
+                                
+                                simplified_csv_string = simplified_csv.decode('utf-8')
+                                main_buffer = io.StringIO(simplified_csv_string, newline='')
+                                main_buffer.seek(0, io.SEEK_END)
+                                writer = csv.writer(main_buffer)
+                                incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
+                                next(incoming_reader, None)
+    
+                                fields = ["Source", "Lobbyist Name", "Filing Link"]
+                                writer.writerow(fields)
+                                
+                                for filing in payload.get("results", []):
+                                    for activity in filing.get("lobbying_activities", []):
+                                        for lobbyist in activity.get("lobbyists", []):
+                                            lobbyist_data = lobbyist.get("lobbyist", [])
+                                            first_name = lobbyist_data.get("first_name") or ""
+                                            last_name = lobbyist_data.get("last_name") or ""
+                                            full_name = first_name + " " + last_name
+                                            uuid = filing.get("filing_uuid")
+                                            link = f"https://lda.senate.gov/filings/public/filing/{uuid}/print/"
+                                            writer.writerow([name, full_name, link])
+                                
+                                total_csv = main_buffer.getvalue().encode('utf-8')
+                                main_buffer.close()
+                                x = 1
+                                
+                            else:
+                                results_placeholder.info(f"No filings matched the provided filters for {name}.")
+                                st.write(f"No filings matched the provided filters for {name}.")
+
+            elif lobbyist_name_list:
+                for name in lobbyist_name_list:
+                    lobbyist_name = name
+                    try:
+                        payload = fetch_filings(
+                            api_token,
+                            client_name=client_name or None,
+                            client_id=client_id,
+                            lobbyist_name=lobbyist_name or None,
+                            lobbyist_id=lobbyist_id,
+                            pause_seconds=pause_seconds,
+                        )
+                    except Exception as exc:
+                        st.error(f"Request failed: {exc}")
+                    else:
+                        results = payload.get("results", [])
+                        count = payload.get("count", len(results))
+    
+                        if x == 1:
+                            if results:
+                                
+                                results_placeholder.success(f"Returned {len(results)} filings for {name} (reported total: {count})")
+                                st.write(f"Returned {len(results)} filings for {name} (reported total: {count})")
+                                
+                                simplified_rows = [_simplified_row(r) for r in results]
+                                simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
+                                
+                                total_csv_string = total_csv.decode('utf-8')
+                                main_buffer = io.StringIO(total_csv_string, newline='')
+                                main_buffer.seek(0, io.SEEK_END)
+                                writer = csv.writer(main_buffer)
+    
+                                simplified_csv_string = simplified_csv.decode('utf-8')
+                                incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
+                                next(incoming_reader, None)
+                                writer.writerows(incoming_reader)
+    
+                                fields = ["Source", "Lobbyist Name", "Filing Link"]
+                                writer.writerow(fields)
+                                
+                                for filing in payload.get("results", []):
+                                    for activity in filing.get("lobbying_activities", []):
+                                        for lobbyist in activity.get("lobbyists", []):
+                                            lobbyist_data = lobbyist.get("lobbyist", [])
+                                            first_name = lobbyist_data.get("first_name") or ""
+                                            last_name = lobbyist_data.get("last_name") or ""
+                                            full_name = first_name + " " + last_name
+                                            uuid = filing.get("filing_uuid")
+                                            link = f"https://lda.senate.gov/filings/public/filing/{uuid}/print/"
+                                            
+                                            writer.writerow([name, full_name, link])
+                                            
+                                total_csv = main_buffer.getvalue().encode('utf-8')
+                                main_buffer.close()
+        
+                            else:
+                                results_placeholder.info(f"No filings matched the provided filters for {name}.")
+                                st.write(f"No filings matched the provided filters for {name}.")
+                                
+                        if x == 0:              
+                            if results:
+                                
+                                results_placeholder.success(f"Returned {len(results)} filings for {name} (reported total: {count})")
+                                st.write(f"Returned {len(results)} filings for {name} (reported total: {count})")
+                                
+                                simplified_rows = [_simplified_row(r) for r in results]
+                                simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
+                                
+                                simplified_csv_string = simplified_csv.decode('utf-8')
+                                main_buffer = io.StringIO(simplified_csv_string, newline='')
+                                main_buffer.seek(0, io.SEEK_END)
+                                writer = csv.writer(main_buffer)
+                                incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
+                                next(incoming_reader, None)
+    
+                                fields = ["Source", "Lobbyist Name", "Filing Link"]
+                                writer.writerow(fields)
+                                
+                                for filing in payload.get("results", []):
+                                    for activity in filing.get("lobbying_activities", []):
+                                        for lobbyist in activity.get("lobbyists", []):
+                                            lobbyist_data = lobbyist.get("lobbyist", [])
+                                            first_name = lobbyist_data.get("first_name") or ""
+                                            last_name = lobbyist_data.get("last_name") or ""
+                                            full_name = first_name + " " + last_name
+                                            uuid = filing.get("filing_uuid")
+                                            link = f"https://lda.senate.gov/filings/public/filing/{uuid}/print/"
+                                            writer.writerow([name, full_name, link])
+                                
+                                total_csv = main_buffer.getvalue().encode('utf-8')
+                                main_buffer.close()
+                                x = 1
+                                
+                            else:
+                                results_placeholder.info(f"No filings matched the provided filters for {name}.")
+                                st.write(f"No filings matched the provided filters for {name}.")
+            else:
                 try:
                     payload = fetch_filings(
                         api_token,
@@ -130,88 +323,16 @@ if fetch_button:
                     results = payload.get("results", [])
                     count = payload.get("count", len(results))
 
-                    if x == 1:
-                        if results:
-                            
-                            results_placeholder.success(f"Returned {len(results)} filings for {name} (reported total: {count})")
-                            st.write(f"Returned {len(results)} filings for {name} (reported total: {count})")
-                            
-                            json_bytes = json.dumps(payload, indent=2).encode("utf-8")
-                            flattened_rows = [_flatten_record(r) for r in results]
-                            simplified_rows = [_simplified_row(r) for r in results]
-                            full_csv = build_csv(flattened_rows)
-                            simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
-                            
-                            total_csv_string = total_csv.decode('utf-8')
-                            main_buffer = io.StringIO(total_csv_string, newline='')
-                            main_buffer.seek(0, io.SEEK_END)
-                            writer = csv.writer(main_buffer)
-
-                            simplified_csv_string = simplified_csv.decode('utf-8')
-                            incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
-                            next(incoming_reader, None)
-                            writer.writerows(incoming_reader)
-
-                            fields = ["Source", "Lobbyist Name", "Filing Link"]
-                            writer.writerow(fields)
-                            
-                            for filing in payload.get("results", []):
-                                for activity in filing.get("lobbying_activities", []):
-                                    for lobbyist in activity.get("lobbyists", []):
-                                        lobbyist_data = lobbyist.get("lobbyist", [])
-                                        first_name = lobbyist_data.get("first_name") or ""
-                                        last_name = lobbyist_data.get("last_name") or ""
-                                        full_name = first_name + " " + last_name
-                                        uuid = filing.get("filing_uuid")
-                                        link = f"https://lda.senate.gov/filings/public/filing/{uuid}/print/"
-                                        
-                                        writer.writerow([name, full_name, link])
-                                        
-                            total_csv = main_buffer.getvalue().encode('utf-8')
-                            main_buffer.close()
-    
-                        else:
-                            results_placeholder.info(f"No filings matched the provided filters for {name}.")
-                            st.write(f"No filings matched the provided filters for {name}.")
-                            
-                    if x == 0:              
-                        if results:
-                            
-                            results_placeholder.success(f"Returned {len(results)} filings for {name} (reported total: {count})")
-                            st.write(f"Returned {len(results)} filings for {name} (reported total: {count})")
-                            
-                            simplified_rows = [_simplified_row(r) for r in results]
-                            simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
-                            
-                            simplified_csv_string = simplified_csv.decode('utf-8')
-                            main_buffer = io.StringIO(simplified_csv_string, newline='')
-                            main_buffer.seek(0, io.SEEK_END)
-                            writer = csv.writer(main_buffer)
-                            incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
-                            next(incoming_reader, None)
-
-                            fields = ["Source", "Lobbyist Name", "Filing Link"]
-                            writer.writerow(fields)
-                            
-                            for filing in payload.get("results", []):
-                                for activity in filing.get("lobbying_activities", []):
-                                    for lobbyist in activity.get("lobbyists", []):
-                                        lobbyist_data = lobbyist.get("lobbyist", [])
-                                        first_name = lobbyist_data.get("first_name") or ""
-                                        last_name = lobbyist_data.get("last_name") or ""
-                                        full_name = first_name + " " + last_name
-                                        uuid = filing.get("filing_uuid")
-                                        link = f"https://lda.senate.gov/filings/public/filing/{uuid}/print/"
-                                        writer.writerow([name, full_name, link])
-                            
-                            total_csv = main_buffer.getvalue().encode('utf-8')
-                            main_buffer.close()
-                            x = 1
-                            
-                        else:
-                            results_placeholder.info(f"No filings matched the provided filters for {name}.")
-                            st.write(f"No filings matched the provided filters for {name}.")
-
+                    if results:
+                        results_placeholder.success(f"Returned {len(results)} filings for {name} (reported total: {count})")
+                        st.write(f"Returned {len(results)} filings for {name} (reported total: {count})")
+                        
+                        simplified_rows = [_simplified_row(r) for r in results]
+                        simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
+                    else:
+                        results_placeholder.info(f"No filings matched the provided filters.")
+                        st.write(f"No filings matched the provided filters.")
+            
             with download_placeholder:
                     st.subheader("Download")
                     st.download_button(
