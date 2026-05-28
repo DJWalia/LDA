@@ -130,24 +130,43 @@ if fetch_button:
                     results = payload.get("results", [])
                     count = payload.get("count", len(results))
     
-                    results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}).")
-    
                     if x == 0:              
                         if results:
+                            
+                            results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}).")
+                            
                             json_bytes = json.dumps(payload, indent=2).encode("utf-8")
                             flattened_rows = [_flatten_record(r) for r in results]
                             simplified_rows = [_simplified_row(r) for r in results]
                             full_csv = build_csv(flattened_rows)
                             simplified_csv = build_csv(simplified_rows, SIMPLE_CSV_FIELDS)
-        
-                            total_csv = simplified_csv
+
+                            
+                            
+                            simplified_csv_string = simplified_csv.decode('utf-8')
+                            main_buffer = io.StringIO(total_csv_string, newline='')
+                            main_buffer.seek(0, io.SEEK_END)
+                            writer = csv.writer(main_buffer)
+                            incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
+                            next(incoming_reader, None)
+                            
+                            for filing in payload.get("results", []):
+                                for lobbyist in payload.get("lobbyists", []):
+                                    name = lobbyist.get("name")
+                                    position = lobbyist.get("covered_position", "")
+                                    writer.writerow([filing_id, filing_type, filing_year, name, covered_pos])
+                            
+                            total_csv = main_buffer.getvalue().encode('utf-8')
                             x = 1
                             
-                    else:
-                        results_placeholder.info("No filings matched the provided filters.")
+                        else:
+                            results_placeholder.info("No filings matched the provided filters.")
     
                     if x == 1:
                         if results:
+                            
+                            results_placeholder.success(f"Returned {len(results)} filings (reported total: {count}).")
+                            
                             json_bytes = json.dumps(payload, indent=2).encode("utf-8")
                             flattened_rows = [_flatten_record(r) for r in results]
                             simplified_rows = [_simplified_row(r) for r in results]
@@ -166,8 +185,8 @@ if fetch_button:
                             total_csv = main_buffer.getvalue().encode('utf-8')
                             main_buffer.close()
     
-                    else:
-                        results_placeholder.info("No filings matched the provided filters.")
+                        else:
+                            results_placeholder.info("No filings matched the provided filters.")
 
             with download_placeholder:
                     st.subheader("Downloads")
