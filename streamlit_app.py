@@ -129,15 +129,18 @@ if fetch_button:
                         st.write("Count is 1.")
                         results.append(new)
                         st.write("Results append.")
+                        st.write(len(results))
                     else:
                         st.write(client_name)
                         results = payload.get("results",[])
                         count = 1
                         st.write("Count set to 1.")
+                        st.write(len(results))
                 except Exception as exc:
                     st.error(f"Request failed: {exc}")
                 else:
                     results = payload.get("results", [])
+                    st.write("Results else.")
 
                     # Build download artifacts
             try:
@@ -170,3 +173,4 @@ if fetch_button:
                     st.error(f"Request failed: {exc}")
             else:
                 results_placeholder.info("No filings matched the provided filters.")
+                st.write(len(results))
