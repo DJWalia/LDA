@@ -152,7 +152,7 @@ if fetch_button:
                             next(incoming_reader, None)
                             writer.writerows(incoming_reader)
 
-                            fields = ["Lobbyist Name", "Filing Link", "Source"]
+                            fields = ["Source", "Filing Link", "Lobbyist Name"]
                             writer.writerow(fields)
                             
                             for filing in payload.get("results", []):
@@ -164,7 +164,7 @@ if fetch_button:
                                         full_name = first_name + " " + last_name
                                         link = filing.get("url")
                                         
-                                        writer.writerow([full_name, link, name])
+                                        writer.writerow([name, full_name, link])
                                         
                             total_csv = main_buffer.getvalue().encode('utf-8')
                             main_buffer.close()
@@ -189,7 +189,7 @@ if fetch_button:
                             incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
                             next(incoming_reader, None)
 
-                            fields = ["Lobbyist Name", "Filing Link", "Source"]
+                            fields = ["Source", "Filing Link", "Lobbyist Name"]
                             writer.writerow(fields)
                             
                             for filing in payload.get("results", []):
@@ -200,7 +200,7 @@ if fetch_button:
                                         last_name = lobbyist_data.get("last_name") or ""
                                         full_name = first_name + " " + last_name
                                         link = filing.get("url")
-                                        writer.writerow([full_name, link, name])
+                                        writer.writerow([name, full_name, link])
                             
                             total_csv = main_buffer.getvalue().encode('utf-8')
                             main_buffer.close()
