@@ -180,7 +180,7 @@ if fetch_button:
                             for filing in payload.get("results", []):
                                 for lobbyist in payload.get("lobbyists", []):
                                     name = lobbyist.get("name")
-                                    st.write(name)
+                                    st.write(lobbyist)
                                     position = lobbyist.get("covered_position", "")
                                     writer.writerow([name, position])
                             
