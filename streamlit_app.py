@@ -112,6 +112,7 @@ if fetch_button:
         st.error(error)
     else:
         with st.spinner("Fetching filings from Senate API. This may take a while."):
+            count = 0
             for client_name in items_list:
                 try:
                     payload = fetch_filings(
@@ -122,8 +123,12 @@ if fetch_button:
                         lobbyist_id=lobbyist_id,
                         pause_seconds=pause_seconds,
                     )
-                    new = payload.get("results",[])
-                    results.append(new)
+                    if count = 1:
+                        new = payload.get("results",[])
+                        results.append(new)
+                    else:
+                        results = payload.get("results",[])
+                        count = 1
                 except Exception as exc:
                     st.error(f"Request failed: {exc}")
                 else:
