@@ -162,7 +162,8 @@ if fetch_button:
                                         first_name = lobbyist_data.get("first_name") or ""
                                         last_name = lobbyist_data.get("last_name") or ""
                                         full_name = first_name + " " + last_name
-                                        link = payload.get("filing_document_url")
+                                        uuid = filing.get("uuid")
+                                        link = f"https://lda.senate.gov/filings/public/filing/{uuid}/print/"
                                         
                                         writer.writerow([name, full_name, link])
                                         
@@ -199,7 +200,8 @@ if fetch_button:
                                         first_name = lobbyist_data.get("first_name") or ""
                                         last_name = lobbyist_data.get("last_name") or ""
                                         full_name = first_name + " " + last_name
-                                        link = payload.get("filing_document_url")
+                                        uuid = filing.get("uuid")
+                                        link = f"https://lda.senate.gov/filings/public/filing/{uuid}/print/"
                                         writer.writerow([name, full_name, link])
                             
                             total_csv = main_buffer.getvalue().encode('utf-8')
