@@ -152,7 +152,7 @@ if fetch_button:
                             next(incoming_reader, None)
                             writer.writerows(incoming_reader)
 
-                            fields = ["Source", "Filing Link", "Lobbyist Name"]
+                            fields = ["Source", "Lobbyist Name", "Filing Link"]
                             writer.writerow(fields)
                             
                             for filing in payload.get("results", []):
@@ -189,7 +189,7 @@ if fetch_button:
                             incoming_reader = csv.reader(io.StringIO(simplified_csv_string, newline=''))
                             next(incoming_reader, None)
 
-                            fields = ["Source", "Filing Link", "Lobbyist Name"]
+                            fields = ["Source", "Lobbyist Name", "Filing Link"]
                             writer.writerow(fields)
                             
                             for filing in payload.get("results", []):
