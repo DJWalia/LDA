@@ -116,34 +116,28 @@ if fetch_button:
         with st.spinner("Fetching filings from Senate API. This may take a while."):
             count = 0
             for item in items_list:
-                try:
-                    payload = fetch_filings(
-                        api_token,
-                        client_name=item or None,
-                        client_id=client_id,
-                        lobbyist_name=lobbyist_name or None,
-                        lobbyist_id=lobbyist_id,
-                        pause_seconds=pause_seconds,
-                    )
-                    if count == 1:
-                        st.write(client_name)
-                        new = payload.get("results",[])
-                        st.write("new len: ",len(new))
-                        st.write("Count is 1.")
-                        results.append(new)
-                        st.write("Results append.")
-                        st.write("results len: ",len(results))
-                    else:
-                        st.write(client_name)
-                        results = payload.get("results",[])
-                        count = 1
-                        st.write("Count set to 1.")
-                        st.write(len(results))
-                except Exception as exc:
-                    st.error(f"Request failed: {exc}")
+                payload = fetch_filings(
+                    api_token,
+                    client_name=item or None,
+                    client_id=client_id,
+                    lobbyist_name=lobbyist_name or None,
+                    lobbyist_id=lobbyist_id,
+                    pause_seconds=pause_seconds,
+                )
+                if count == 1:
+                    st.write(client_name)
+                    new = payload.get("results",[])
+                    st.write("new len: ",len(new))
+                    st.write("Count is 1.")
+                    results.append(new)
+                    st.write("Results append.")
+                    st.write("results len: ",len(results))
                 else:
-                    results = payload.get("results", [])
-                    st.write("Results else.")
+                    st.write(client_name)
+                    results = payload.get("results",[])
+                    count = 1
+                    st.write("Count set to 1.")
+                    st.write(len(results))
 
                     # Build download artifacts
             try:
